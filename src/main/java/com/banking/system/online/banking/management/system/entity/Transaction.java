@@ -14,13 +14,12 @@ public class Transaction {
 
     private Double amount;
 
-    private String transaction_type; // CREDIT / DEBIT
+    private String transaction_type;
 
     private LocalDateTime timestamp;
 
-    @ManyToOne
-    @JoinColumn(name = "account_id")
-    private Account account;
+    private Long fromAccountNumber;
+    private Long toAccountNumber;
 
     public Long getId() {
         return id;
@@ -46,6 +45,22 @@ public class Transaction {
         this.transaction_type = transaction_type;
     }
 
+    public Long getFromAccountNumber() {
+        return fromAccountNumber;
+    }
+
+    public void setFromAccountNumber(Long fromAccountNumber) {
+        this.fromAccountNumber = fromAccountNumber;
+    }
+
+    public Long getToAccountNumber() {
+        return toAccountNumber;
+    }
+
+    public void setToAccountNumber(Long toAccountNumber) {
+        this.toAccountNumber = toAccountNumber;
+    }
+
     public LocalDateTime getTimestamp() {
         return timestamp;
     }
@@ -53,14 +68,7 @@ public class Transaction {
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
-
-    public Account getAccount() {
-        return account;
-    }
-
-    public void setAccount(Account account) {
-        this.account = account;
-    }
-
-
 }
+
+
+

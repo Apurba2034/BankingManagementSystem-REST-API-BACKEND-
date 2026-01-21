@@ -43,27 +43,30 @@ public class AccountService {
         account.setAccountNumber(generateAccountNumber());
         return accountRepository.save(account);
     }
-    public void deposit(DepositRequest dto){
-        Account account=accountRepository.findById(dto.getAccountId())
-                .orElseThrow(()->new RuntimeException("Account not found"));
+    public void deposit(DepositRequest dto) {
+        Account account = accountRepository.findById(dto.getAccountId())
+                .orElseThrow(() -> new RuntimeException("Account not found"));
 
-        account.setBalance(account.getBalance()+dto.getAmount());
+        account.setBalance(account.getBalance() + dto.getAmount());
         accountRepository.save(account);
 
-        Transaction transactionn = new Transaction();
-        transactionn.setAccount(account);
-        transactionn.setAmount(dto.getAmount());
-        transactionn.setTransaction_type("CREDIT");
-        transactionn.setTimestamp(LocalDateTime.now());
-        transactionRepository.save(transactionn);
+        Transaction tx = new Transaction();
+        tx.setAmount(dto.getAmount());
+        tx.setTransaction_type("CREDIT");
+        tx.setTimestamp(LocalDateTime.now());
+        tx.setFromAccountNumber(null);
+        tx.setToAccountNumber(account.getAccountNumber());
 
+        transactionRepository.save(tx);
     }
+
     public void transfer(TransferRequest dto) {
 
         Account from = accountRepository.findByAccountNumber(dto.getFromAccountNumber())
-                .orElseThrow(() -> new RuntimeException("account not found"));
+                .orElseThrow(() -> new RuntimeException("From account not found"));
+
         Account to = accountRepository.findByAccountNumber(dto.getToAccountNumber())
-                .orElseThrow(() -> new RuntimeException("account not found"));
+                .orElseThrow(() -> new RuntimeException("To account not found"));
 
         if (from.getBalance() < dto.getAmount()) {
             throw new RuntimeException("Insufficient balance");
@@ -75,21 +78,26 @@ public class AccountService {
         accountRepository.save(from);
         accountRepository.save(to);
 
+
         Transaction debit = new Transaction();
-        debit.setAccount(from);
         debit.setAmount(dto.getAmount());
         debit.setTransaction_type("DEBIT");
         debit.setTimestamp(LocalDateTime.now());
+        debit.setFromAccountNumber(from.getAccountNumber());
+        debit.setToAccountNumber(to.getAccountNumber());
+
 
         Transaction credit = new Transaction();
-        credit.setAccount(to);
         credit.setAmount(dto.getAmount());
         credit.setTransaction_type("CREDIT");
         credit.setTimestamp(LocalDateTime.now());
+        credit.setFromAccountNumber(from.getAccountNumber());
+        credit.setToAccountNumber(to.getAccountNumber());
 
         transactionRepository.save(debit);
         transactionRepository.save(credit);
     }
+
     public Account getAccount(Long accountId) {
         return accountRepository.findById(accountId)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
